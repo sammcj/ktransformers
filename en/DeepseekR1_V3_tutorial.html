@@ -282,11 +282,11 @@ Memory: standard DDR5-4800 server DRAM (1 TB), each socket with 8×DDR5-4800</p>
 <ul>
 <li>Longer Context (from 4K to 8K for 24GB VRAM) and Slightly Faster Speed （+15%):<br>
 Integrated the highly efficient Triton MLA Kernel from the fantastic sglang project, enable much longer context length and slightly faster prefill/decode speed</li>
-<li>We suspect the impressive improvement comes from the change of hardwre platform (4090D-&gt;4090)</li>
+<li>We suspect that some of the improvements come from the change of hardwre platform (4090D-&gt;4090)</li>
 </ul>
 <h4 id="benchmark-results"><a class="header" href="#benchmark-results">Benchmark Results</a></h4>
 <p>"6 experts" case is part of V0.3's preview</p>
-<div class="table-wrapper"><table><thead><tr><th>Prompt</th><th>hi (2)</th><th>1K (969)</th><th>2K (1930)</th><th>4K (3846)</th><th>llama.cpp (8 experts)</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Prompt</th><th>hi (2)</th><th>1K (969)</th><th>2K (1930)</th><th>4K (3846)</th><th>8K (7678)</th></tr></thead><tbody>
 <tr><td>Output length</td><td>10tokens</td><td>300tokens</td><td>300tokens</td><td>300tokens</td><td>300tokens</td></tr>
 <tr><td><strong>6 experts V0.2.0</strong></td><td></td><td></td><td></td><td></td><td></td></tr>
 <tr><td>Prefill token/s</td><td>13</td><td>105</td><td>102</td><td>88</td><td>CUDA OOM</td></tr>
