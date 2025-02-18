@@ -635,7 +635,7 @@ can increase the number for longer answer (But be aware of OOM, and increase it 
 <p>The command <code>numactl -N 1 -m 1</code> aims to advoid data transfer between numa nodes<br>
 Attention! If you are testing R1 and it may skip thinking. So you can add arg: <code>--force_think true</code>. This is explained in <a href="en/DeepseekR1_V3_tutorial.html#faq">FAQ</a> part</p>
 <h4 id="dual-socket-version-64-cores"><a class="header" href="#dual-socket-version-64-cores">Dual socket version (64 cores)</a></h4>
-<p>Make suer before you install (use install.sh or <code>make dev_install</code>), setting the env var <code>USE_NUMA=1</code> by <code>export USE_NUMA=1</code> (if already installed, reinstall it with this env var set). You may check the doc <a href="en/./install.html">here</a> for install details. <br></p>
+<p>Make sure before you install (use install.sh or <code>make dev_install</code>), setting the env var <code>USE_NUMA=1</code> by <code>export USE_NUMA=1</code> (if already installed, reinstall it with this env var set). You may check the doc <a href="en/./install.html">here</a> for install details. <br></p>
 <p>Test Command:</p>
 <pre><code class="language-shell"># ---For those who have not installed ktransformers---
 # git clone https://github.com/kvcache-ai/ktransformers.git
@@ -1378,7 +1378,7 @@ Note KExpertsTorch is untested.</p>
 <blockquote>
 <p>ImportError: /mnt/data/miniconda3/envs/xxx/bin/../lib/libstdc++.so.6: version `GLIBCXX_3.4.30' not found (required by /home/xxx/xxx/ktransformers/./cpuinfer_ext.cpython-312-x86_64-linux-gnu.so)</p>
 </blockquote>
-<p>It may because of your conda env have no this version. Your can first exit your conda env by <code>conda deactivate</code> and use <code>whereis libstdc++.so.6</code> to find the path. And re enter your conda env and copy the .so by <code>cp &lt;path of outter libstdc++&gt; &lt;path of your conda env libstdc++&gt;</code></p>
+<p>Running conda install -c conda-forge libstdcxx-ng can solve the problem.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="hello-everyone-here-is-the-successfully-reproduced-environment-configuration-for-your-reference"><a class="header" href="#hello-everyone-here-is-the-successfully-reproduced-environment-configuration-for-your-reference">Hello everyone, here is the successfully reproduced environment configuration for your reference:</a></h2>
 <h3 id="case-1"><a class="header" href="#case-1">Case 1</a></h3>
 <ul>
