@@ -10,6 +10,7 @@ class ArgumentParser:
         parser = argparse.ArgumentParser(prog="kvcache.ai", description="Ktransformers")
         parser.add_argument("--host", type=str, default=self.cfg.server_ip)
         parser.add_argument("--port", type=int, default=self.cfg.server_port)
+        parser.add_argument("--api_key", type=str, default=self.cfg.api_key)
         parser.add_argument("--ssl_keyfile", type=str)
         parser.add_argument("--ssl_certfile", type=str)
         parser.add_argument("--web", type=bool, default=self.cfg.mount_web)
@@ -23,13 +24,13 @@ class ArgumentParser:
         parser.add_argument("--optimize_config_path", default=self.cfg.optimize_config_path, type=str, required=False)
         parser.add_argument("--cpu_infer", type=int, default=self.cfg.cpu_infer)
         parser.add_argument("--type", type=str, default=self.cfg.backend_type)
+        parser.add_argument("--chunk_prefill_size", type=int, default=8192)
 
         # model configs
         # parser.add_argument("--model_cache_lens", type=int, default=self.cfg.cache_lens)  # int?
         parser.add_argument("--paged", type=bool, default=self.cfg.paged)
         parser.add_argument("--total_context", type=int, default=self.cfg.total_context)
         parser.add_argument("--max_batch_size", type=int, default=self.cfg.max_batch_size)
-        parser.add_argument("--max_chunk_size", type=int, default=self.cfg.max_chunk_size)
         parser.add_argument("--max_new_tokens", type=int, default=self.cfg.max_new_tokens)
         parser.add_argument("--json_mode", type=bool, default=self.cfg.json_mode)
         parser.add_argument("--healing", type=bool, default=self.cfg.healing)
