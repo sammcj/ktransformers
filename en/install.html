@@ -24,17 +24,18 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -158,7 +161,22 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="how-to-run-deepseek-r1"><a class="header" href="#how-to-run-deepseek-r1">How to Run DeepSeek-R1</a></h1>
+                        <!-- omit in toc -->
+<h1 id="how-to-run-deepseek-r1"><a class="header" href="#how-to-run-deepseek-r1">How to Run DeepSeek-R1</a></h1>
+<ul>
+<li><a href="#how-to-run-deepseek-r1">How to Run DeepSeek-R1</a>
+<ul>
+<li><a href="#preparation">Preparation</a></li>
+<li><a href="#installation">Installation</a>
+<ul>
+<li><a href="#attention">Attention</a></li>
+<li><a href="#supported-models-include">Supported models include</a></li>
+<li><a href="#support-quantize-format">Support quantize format</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 <p>In this document, we will show you how to install and run KTransformers on your local machine. There are two versions:</p>
 <ul>
 <li>V0.2 is the current main branch.</li>
@@ -188,9 +206,12 @@ fi
 </code></pre>
 </li>
 <li>
-<p>Linux-x86_64 with gcc, g++ and cmake (using Ubuntu as an example)</p>
-<pre><code class="language-sh">sudo apt-get update
-sudo apt-get install build-essential cmake ninja-build
+<p>Linux-x86_64 with gcc, g++&gt;=11 and cmake&gt;=3.25 (using Ubuntu as an example)</p>
+</li>
+<li>
+<p><strong>Note</strong>: The default CMake version in Ubuntu 22.04 LTS or higher may not support newer CUDA language dialects (e.g., CUDA 20). This can cause errors such as Target "cmTC_xxxxxx" requires the language dialect "CUDA20", but CMake does not know the compile flags to use to enable it. To resolve this, install a newer CMake version, for instance, by adding the Kitware APT repository.</p>
+<pre><code class="language-sh">sudo apt-get update 
+sudo apt-get install build-essential cmake ninja-build patchelf
 </code></pre>
 </li>
 <li>
@@ -200,7 +221,7 @@ conda activate ktransformers # you may need to run ‘conda init’ and reopen s
 
 conda install -c conda-forge libstdcxx-ng # Anaconda provides a package called `libstdcxx-ng` that includes a newer version of `libstdc++`, which can be installed via `conda-forge`.
 
-strings ~/anaconda3/envs/ktransformers-0.3/lib/libstdc++.so.6 | grep GLIBCXX
+strings ~/anaconda3/envs/ktransformers/lib/libstdc++.so.6 | grep GLIBCXX
 </code></pre>
 </li>
 <li>
@@ -214,6 +235,11 @@ pip3 install packaging ninja cpufeature numpy
 </li>
 </ul>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<h3 id="attention"><a class="header" href="#attention">Attention</a></h3>
+<p>If you want to use numa support, not only do you need to set USE_NUMA=1, but you also need to make sure you have installed the libnuma-dev (<code>sudo apt-get install libnuma-dev</code> may help you).</p>
+<p>[Optional] If you want to use the multi-concurrent version, please install the following dependencies.</p>
+<pre><code>sudo apt install libtbb-dev libssl-dev libcurl4-openssl-dev libaio1 libaio-dev libgflags-dev zlib1g-dev libfmt-dev
+</code></pre>
 <!-- 1. ~~Use a Docker image, see [documentation for Docker](./doc/en/Docker.md)~~
    
    >We are working on the latest docker image, please wait for a while.
@@ -226,16 +252,13 @@ pip3 install packaging ninja cpufeature numpy
    ```
    
    for windows we prepare a pre compiled whl package on [ktransformers-0.2.0+cu125torch24avx2-cp312-cp312-win_amd64.whl](https://github.com/kvcache-ai/ktransformers/releases/download/v0.2.0/ktransformers-0.2.0+cu125torch24avx2-cp312-cp312-win_amd64.whl), which require cuda-12.5, torch-2.4, python-3.11, more pre compiled package are being produced.  -->
-<ul>
-<li>
 <p>Download source code and compile:</p>
 <ul>
 <li>
 <p>init source code</p>
 <pre><code class="language-sh">git clone https://github.com/kvcache-ai/ktransformers.git
 cd ktransformers
-git submodule init
-git submodule update
+git submodule update --init --recursive
 </code></pre>
 </li>
 <li>
@@ -252,22 +275,31 @@ git submodule update
 <li>
 <p>For those who have two cpu and 1T RAM:</p>
 <pre><code class="language-shell"># Make sure your system has dual sockets and double size RAM than the model's size (e.g. 1T RAM for 512G model)
-export USE_NUMA=1
-bash install.sh # or `make dev_install`
+ apt install libnuma-dev
+ export USE_NUMA=1
+ bash install.sh # or #make dev_install
+</code></pre>
+</li>
+<li>
+<p>For Multi-concurrency with 500G RAM:</p>
+<pre><code class="language-shell">USE_BALANCE_SERVE=1 bash ./install.sh
+</code></pre>
+</li>
+<li>
+<p>For Multi-concurrency with two cpu and 1T RAM:</p>
+<pre><code class="language-shell">USE_BALANCE_SERVE=1 USE_NUMA=1 bash ./install.sh
 </code></pre>
 </li>
 </ul>
 </li>
 <li>
-<p>For Windows</p>
+<p>For Windows (Windows native temprarily deprecated, please try WSL)</p>
 <pre><code class="language-shell">install.bat
 </code></pre>
 </li>
 </ul>
-</li>
-<li>
-<p>If you are developer, you can make use of the makefile to compile and format the code. <br> the detailed usage of makefile is <a href="./makefile_usage.html">here</a></p>
-</li>
+<ul>
+<li>If you are developer, you can make use of the makefile to compile and format the code. <br> the detailed usage of makefile is <a href="./makefile_usage.html">here</a></li>
 </ul>
 <h3 id="local-chat"><a class="header" href="#local-chat">Local Chat</a></h3>
 We provide a simple command-line local chat Python script that you can run for testing.
@@ -283,7 +315,7 @@ We provide a simple command-line local chat Python script that you can run for t
 mkdir DeepSeek-V2-Lite-Chat-GGUF
 cd DeepSeek-V2-Lite-Chat-GGUF
 
-wget https://huggingface.co/mzwing/DeepSeek-V2-Lite-Chat-GGUF/resolve/main/DeepSeek-V2-Lite-Chat.Q4_K_M.gguf -O DeepSeek-V2-Lite-Chat.Q4_K_M.gguf
+wget https://huggingface.co/mradermacher/DeepSeek-V2-Lite-GGUF/resolve/main/DeepSeek-V2-Lite.Q4_K_M.gguf -O DeepSeek-V2-Lite-Chat.Q4_K_M.gguf
 
 cd .. # Move to repo's root dir
 
@@ -306,7 +338,7 @@ python -m ktransformers.local_chat --model_path deepseek-ai/DeepSeek-V2-Lite-Cha
 <p><code>--gguf_path</code> (required): Path of a directory containing GGUF files which could that can be downloaded from <a href="https://huggingface.co/mzwing/DeepSeek-V2-Lite-Chat-GGUF/tree/main">Hugging Face</a>. Note that the directory should only contains GGUF of current model, which means you need one separate directory for each model.</p>
 </li>
 <li>
-<p><code>--optimize_rule_path</code> (required except for Qwen2Moe and DeepSeek-V2): Path of YAML file containing optimize rules. There are two rule files pre-written in the <a href="ktransformers/optimize/optimize_rules">ktransformers/optimize/optimize_rules</a> directory for optimizing DeepSeek-V2 and Qwen2-57B-A14, two SOTA MoE models.</p>
+<p><code>--optimize_config_path</code> (required except for Qwen2Moe and DeepSeek-V2): Path of YAML file containing optimize rules. There are two rule files pre-written in the <a href="ktransformers/optimize/optimize_rules">ktransformers/optimize/optimize_rules</a> directory for optimizing DeepSeek-V2 and Qwen2-57B-A14, two SOTA MoE models.</p>
 </li>
 <li>
 <p><code>--max_new_tokens</code>: Int (default=1000). Maximum number of new tokens to generate.</p>
@@ -315,10 +347,21 @@ python -m ktransformers.local_chat --model_path deepseek-ai/DeepSeek-V2-Lite-Cha
 <p><code>--cpu_infer</code>: Int (default=10). The number of CPUs used for inference. Should ideally be set to the (total number of cores - 2).</p>
 </li>
 </ul>
+<h3 id="start-server"><a class="header" href="#start-server">Start Server</a></h3>
+We provide a server script, which supports multi-concurrency functionality in version v0.2.4.
+<pre><code>python ktransformers/server/main.py --model_path /mnt/data/models/DeepSeek-V3 --gguf_path /mnt/data/models/DeepSeek-V3-GGUF/DeepSeek-V3-Q4_K_M/ --cpu_infer 62 --optimize_config_path ktransformers/optimize/optimize_rules/DeepSeek-V3-Chat-serve.yaml --port 10002 --chunk_size 256 --max_new_tokens 1024 --max_batch_size 4 --port 10002 --cache_lens 32768 --backend_type balance_serve
+</code></pre>
+<p>It features the following arguments:</p>
+<ul>
+<li><code>--chunk_size</code>: Maximum number of tokens processed in a single run by the engine.</li>
+<li><code>--cache_lens</code>: Total length of kvcache allocated by the scheduler. All requests share a kvcache space corresponding to 32768 tokens, and the space occupied will be released after the requests are completed.</li>
+<li><code>--backend_type</code>: <code>balance_serve</code> is a multi-concurrency backend engine introduced in version v0.2.4. The original single-concurrency engine is <code>ktransformers</code>.</li>
+<li><code>--max_batch_size</code>: Maximum number of requests (prefill + decode) processed in a single run by the engine. (Supported only by <code>balance_serve</code>)</li>
+</ul>
 <details>
 <summary>Supported Models/quantization</summary>
-<h3 id="supported-models-include"><a class="header" href="#supported-models-include">Supported models include:</a></h3>
-<div class="table-wrapper"><table><thead><tr><th>✅ <strong>Supported Models</strong></th><th>❌ <strong>Deprecated Models</strong></th></tr></thead><tbody>
+<h3 id="supported-models-include"><a class="header" href="#supported-models-include">Supported models include</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>✅<strong>Supported Models</strong></th><th>❌<strong>Deprecated Models</strong></th></tr></thead><tbody>
 <tr><td>DeepSeek-R1</td><td><del>InternLM2.5-7B-Chat-1M</del></td></tr>
 <tr><td>DeepSeek-V3</td><td></td></tr>
 <tr><td>DeepSeek-V2</td><td></td></tr>
@@ -329,9 +372,11 @@ python -m ktransformers.local_chat --model_path deepseek-ai/DeepSeek-V2-Lite-Cha
 <tr><td>Mixtral-8x22B</td><td></td></tr>
 </tbody></table>
 </div>
-<h3 id="support-quantize-format"><a class="header" href="#support-quantize-format">Support quantize format:</a></h3>
-<div class="table-wrapper"><table><thead><tr><th>✅ <strong>Supported Formats</strong></th><th>❌ <strong>Deprecated Formats</strong></th></tr></thead><tbody>
-<tr><td>Q2_K_L</td><td><del>IQ2_XXS</del></td></tr>
+<h3 id="support-quantize-format"><a class="header" href="#support-quantize-format">Support quantize format</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>✅<strong>Supported Formats</strong></th><th>❌<strong>Deprecated Formats</strong></th></tr></thead><tbody>
+<tr><td>IQ1_S</td><td><del>IQ2_XXS</del></td></tr>
+<tr><td>IQ2_XXS</td><td></td></tr>
+<tr><td>Q2_K_L</td><td></td></tr>
 <tr><td>Q2_K_XS</td><td></td></tr>
 <tr><td>Q3_K_M</td><td></td></tr>
 <tr><td>Q4_K_M</td><td></td></tr>
@@ -408,7 +453,7 @@ python -m ktransformers.local_chat --model_name deepseek-ai/DeepSeek-V2-Chat-062
 </tbody></table>
 </div></details>
 <!-- pin block for jump -->
-<span id='id_666'> 
+<span id='id_666'>
 <h3 id="restful-api-and-web-ui"><a class="header" href="#restful-api-and-web-ui">RESTful API and Web UI  </a></h3>
 <p>Start without website:</p>
 <pre><code class="language-sh">ktransformers --model_path deepseek-ai/DeepSeek-V2-Lite-Chat --gguf_path /path/to/DeepSeek-V2-Lite-Chat-GGUF --port 10002
